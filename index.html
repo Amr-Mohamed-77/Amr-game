@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>حزازير وألغاز</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A1033">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #170F2E;
+    --bg-2: #221A44;
+    --panel: #251C4A;
+    --amber: #E8A93B;
+    --amber-soft: #F3C876;
+    --cream: #F4EFE6;
+    --easy: #4C9A6A;
+    --medium: #D08A2A;
+    --hard: #C0473F;
+    --text-dim: #B6ACD6;
+    --radius: 18px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Tajawal', sans-serif;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(232,169,59,0.10), transparent 42%),
+      radial-gradient(circle at 88% 92%, rgba(126,92,214,0.14), transparent 48%),
+      var(--bg);
+    color: var(--cream);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    overflow-x:hidden;
+  }
+  #app{ width:100%; max-width:480px; position:relative; }
+  .screen{ animation: fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){ .screen{animation:none;} }
+
+  .motif{ position:absolute; width:46px; height:46px; border: 2px solid var(--amber); opacity:0.5; }
+  .motif::before{ content:""; position:absolute; inset:6px; border:1px solid var(--amber); transform:rotate(45deg); }
+  .motif.tl{ top:-10px; right:-10px; border-width:0 2px 2px 0; border-radius: 0 0 0 24px;}
+  .motif.br{ bottom:-10px; left:-10px; border-width:2px 0 0 2px; border-radius: 24px 0 0 0;}
+
+  .card{
+    background: var(--panel);
+    border:1px solid rgba(232,169,59,0.22);
+    border-radius: var(--radius);
+    padding:28px 22px;
+    position:relative;
+    box-shadow: 0 20px 40px -20px rgba(0,0,0,0.65);
+  }
+
+  h1.title{
+    font-family:'Cairo', sans-serif;
+    font-weight:900;
+    font-size:1.9rem;
+    text-align:center;
+    color: var(--amber-soft);
+    margin-bottom:4px;
+  }
+  .subtitle{ text-align:center; color: var(--text-dim); font-size:0.92rem; margin-bottom:26px; }
+  .rule{ height:1px; background: linear-gradient(90deg, transparent, var(--amber), transparent); opacity:0.5; margin: 18px 0; }
+
+  .diff-list{ display:flex; flex-direction:column; gap:12px; }
+  .diff-btn{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px; border-radius:14px; border:1px solid rgba(255,255,255,0.08);
+    cursor:pointer; font-family:'Cairo', sans-serif; font-weight:700; color:var(--cream);
+    background: var(--bg-2); transition: transform .15s ease, filter .15s ease;
+  }
+  .diff-btn:hover, .diff-btn:focus-visible{ transform: translateY(-2px); filter:brightness(1.12); outline:none;}
+  .diff-btn .dot{ width:12px; height:12px; border-radius:50%; }
+  .diff-btn.easy .dot{ background:var(--easy);} 
+  .diff-btn.medium .dot{ background:var(--medium);} 
+  .diff-btn.hard .dot{ background:var(--hard);} 
+  .diff-btn .meta{ font-family:'Tajawal',sans-serif; font-weight:400; font-size:0.8rem; color:var(--text-dim);}
+
+  .back-link{
+    display:inline-flex; align-items:center; gap:6px; color: var(--text-dim);
+    font-size:0.85rem; cursor:pointer; margin-bottom:18px; background:none; border:none; font-family:'Tajawal',sans-serif;
+  }
+  .back-link:hover{ color: var(--amber-soft); }
+
+  .sound-toggle{
+    position:absolute; top:16px; left:16px;
+    width:38px; height:38px;
+    border-radius:50%;
+    border:1px solid rgba(232,169,59,0.3);
+    background: var(--bg-2);
+    font-size:1.1rem;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .15s ease, background .15s ease;
+    z-index:2;
+  }
+  .sound-toggle:hover{ transform:scale(1.06); background:#2A2154; }
+
+  .quiz-top{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;
+    font-family:'Cairo', sans-serif; font-size:0.85rem; color: var(--text-dim);
+  }
+  .score-pill{
+    background: rgba(232,169,59,0.12); border:1px solid rgba(232,169,59,0.35);
+    color: var(--amber-soft); padding:4px 12px; border-radius:999px; font-weight:700;
+  }
+  .progress-bar{ height:6px; background: rgba(255,255,255,0.08); border-radius:99px; overflow:hidden; margin-bottom:22px; }
+  .progress-fill{ height:100%; background: linear-gradient(90deg, var(--amber), var(--amber-soft)); transition: width .3s ease; }
+
+  .riddle-box{
+    background: var(--bg-2);
+    border: 1px solid rgba(232,169,59,0.18);
+    border-radius: 14px;
+    padding:18px;
+    margin-bottom:16px;
+  }
+  .riddle-icon{ font-size:1.4rem; margin-bottom:8px; display:block; }
+  .q-text{
+    font-family:'Cairo', sans-serif; font-weight:700; font-size:1.1rem; line-height:1.8;
+  }
+  .hint-row{ display:flex; justify-content:flex-end; margin-bottom:16px; }
+  .hint-btn{
+    background:none; border:1px solid rgba(232,169,59,0.4); color: var(--amber-soft);
+    padding:7px 14px; border-radius:999px; font-family:'Tajawal',sans-serif; font-size:0.82rem; cursor:pointer;
+    transition: background .15s ease;
+  }
+  .hint-btn:hover{ background: rgba(232,169,59,0.1); }
+  .hint-btn:disabled{ opacity:0.4; cursor:default; }
+  .hint-text{
+    font-size:0.85rem; color: var(--amber-soft); background: rgba(232,169,59,0.08);
+    border-radius:10px; padding:10px 12px; margin-bottom:16px; display:none; line-height:1.7;
+  }
+  .hint-text.show{ display:block; animation: fadeIn .25s ease; }
+
+  .options{ display:flex; flex-direction:column; gap:11px; }
+  .opt-btn{
+    text-align:right; padding:14px 16px; border-radius:12px; border:1px solid rgba(255,255,255,0.1);
+    background: var(--bg-2); color: var(--cream); font-family:'Tajawal', sans-serif; font-size:0.98rem;
+    cursor:pointer; transition: all .15s ease;
+  }
+  .opt-btn:hover:not(:disabled){ border-color: var(--amber); background:#2A2154; }
+  .opt-btn:focus-visible{ outline: 2px solid var(--amber); outline-offset:2px; }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.correct{ background: rgba(76,154,106,0.25); border-color: var(--easy); color:#CDEBD8; }
+  .opt-btn.wrong{ background: rgba(192,71,63,0.25); border-color: var(--hard); color:#F0CFC7; }
+
+  .next-hint{ text-align:center; color: var(--text-dim); font-size:0.8rem; margin-top:16px; min-height:18px; }
+
+  .result-emoji{ text-align:center; font-size:3rem; margin-bottom:6px; }
+  .result-score{
+    text-align:center; font-family:'Cairo', sans-serif; font-weight:900; font-size:2.4rem;
+    color: var(--amber-soft); margin-bottom:4px;
+  }
+  .result-label{ text-align:center; color: var(--text-dim); margin-bottom:6px; font-size:0.95rem; }
+  .result-best{ text-align:center; color: var(--amber); font-size:0.85rem; margin-bottom:22px; }
+  .btn-row{ display:flex; gap:10px; }
+  .btn{
+    flex:1; padding:13px; border-radius:12px; border:none; font-family:'Cairo', sans-serif;
+    font-weight:700; cursor:pointer; font-size:0.92rem; transition: filter .15s ease, transform .15s ease;
+  }
+  .btn:hover{ filter:brightness(1.1); transform:translateY(-2px); }
+  .btn-primary{ background: linear-gradient(135deg, var(--amber), var(--amber-soft)); color:#241A0A; }
+  .btn-secondary{ background: var(--bg-2); color: var(--cream); border:1px solid rgba(255,255,255,0.12); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------------- Riddle bank ---------------- */
+const RIDDLES = {
+  easy: [
+    {q:"شيء له عين ولا يرى، ما هو؟", hint:"تستخدمه في الخياطة", options:["الإبرة","المرآة","النافذة","الكاميرا"], a:0},
+    {q:"ما هو الشيء الذي كلما أخذت منه كبر؟", hint:"فكر في الأرض تحت قدميك", options:["الجدار","الحفرة","الكتاب","الجبل"], a:1},
+    {q:"شيء يمشي بلا رجلين ويبكي بلا عينين، ما هو؟", hint:"تراه في السماء بعد الحر", options:["النهر","السحاب","الريح","الموج"], a:1},
+    {q:"ما الشيء الذي يُكسر ولا يُمسك باليد؟", hint:"لا يمكنك أن تلمسه لكنه ينكسر", options:["الزجاج","الوعد","البيضة","القلم"], a:1},
+    {q:"بيت بلا أبواب ولا شبابيك، ما هو؟", hint:"يوجد داخل ثمار كثيرة", options:["الكهف","البيضة","الصندوق","القفص"], a:1},
+    {q:"شيء إذا وقف تحرّك، وإذا تحرّك وقف، ما هو؟", hint:"تراه على الأرض في الشمس", options:["الساعة","الظل","الطائر","الغيمة"], a:1},
+    {q:"ما هو الشيء الذي له أسنان ولا يعض؟", hint:"تستخدمه لترتيب شعرك", options:["المشط","المنشار","السكين","الفأس"], a:0},
+    {q:"ما الشيء الذي يزداد ثقلاً كلما أضفت له هواء؟", hint:"تستخدمه في اللعب", options:["البالون","الكرة","الإطار","الوسادة"], a:1},
+    {q:"شيء تراه في الليل ثلاث مرات وفي النهار مرة، ما هو؟", hint:"احسب عدد النقاط فوق الحروف: حرف اللام ثلاث نقاط... فكر بحرف آخر", options:["حرف الشين","حرف الثاء","حرف النون","حرف الباء"], a:0},
+    {q:"ما هو الشيء الذي كلما زاد نقص؟", hint:"فكر بشيء يمر ولا يعود", options:["العمر","المال","الماء","الوقت المتبقي في اليوم"], a:3},
+    {q:"شيء يدخل الماء ولا يبتل، ما هو؟", hint:"ينعكس على السطح", options:["الضوء","القارب","السمك","المظلة"], a:0},
+    {q:"ما الشيء الذي له رأس ولا عقل له؟", hint:"تستخدمه للطرق على المسامير", options:["المطرقة","الدبوس","الثوم","الملقط"], a:1},
+    {q:"ما هو الشيء الذي يمشي واقفاً وينام واقفاً أيضاً؟", hint:"حيوان طويل الرقبة", options:["الفيل","الزرافة","الحصان","الجمل"], a:1},
+    {q:"شيء له وجه ولا رأس له، وله أرقام ولا يتكلم، ما هو؟", hint:"تنظر إليه لمعرفة الوقت", options:["الساعة","الهاتف","التقويم","الكتاب"], a:0},
+    {q:"ما الشيء الذي يكبر في الشتاء ويصغر في الصيف؟", hint:"شيء تلبسه فوق ملابسك", options:["المعطف","الظل","القمر","الشجرة"], a:0},
+    {q:"بيت صغير أبيض، لا باب له ولا شباك، إذا أردت الخروج منه تكسر الجدار، ما هو؟", hint:"يخرج منه الكتكوت", options:["الصندوق","بيضة الدجاجة","الكهف","القوقعة"], a:1},
+    {q:"شيء كلما غسلته يصبح أوسخ، ما هو؟", hint:"تستخدمه لتنظيف الأشياء الأخرى", options:["الماء","الصابون","الملابس","ماء الغسيل"], a:3},
+    {q:"ما الحيوان الذي يحمل بيته على ظهره أينما ذهب؟", hint:"بطيء الحركة جداً", options:["السلحفاة","النملة","القنفذ","الحلزون"], a:3},
+    {q:"شيء له أوراق وليس نباتاً، ما هو؟", hint:"تكتب فيه أو تقرأ منه", options:["الشجرة","الكتاب","الزهرة","الغصن"], a:1},
+    {q:"ما الشيء الذي يتكلم بكل اللغات؟", hint:"يردد كل ما تقوله بالضبط", options:["الراديو","المترجم","الصدى","التلفاز"], a:2},
+    {q:"شيء أبيض إذا نزل من السماء يذوب إذا لمسته يدك الدافئة، ما هو؟", hint:"يتساقط في المناطق الباردة شتاءً", options:["المطر","الثلج","البَرَد","الضباب"], a:1},
+    {q:"ما الذي يزداد كلما قسمته؟", hint:"فكّر بأمر تشاركه مع الناس فيزيد لا ينقص", options:["الكعكة","الخبز","العدد","الصداقة"], a:3},
+    {q:"شيء له إبرة ولا يخيط، وله وجه ولا يتكلم، ما هو؟", hint:"موجود بالسيارة يقيس السرعة أو بالساعة", options:["البوصلة","عقارب الساعة","الميزان","المسطرة"], a:1},
+    {q:"ما هو الشيء الذي تراه مرة في الأسبوع، ومرتين في السنة، ولا تراه أبداً في اليوم؟", hint:"فكّر بحروف كلمة معينة لا بوقت فعلي", options:["حرف السين","حرف الألف","حرف الميم","حرف النون"], a:0},
+  ],
+  medium: [
+    {q:"رجل دخل غرفة مظلمة ومعه عود ثقاب واحد، وفيها موقد نار، مصباح زيت، وشمعة. ما أول شيء يشعله؟", hint:"فكّر بما يحمله بيده أصلاً قبل دخول الغرفة", options:["الموقد","المصباح","الشمعة","عود الثقاب نفسه"], a:3},
+    {q:"أب وابنه كانا في حادث سيارة، الأب توفي والابن نُقل للمستشفى. نظر الجراح للابن وقال: لا أستطيع أن أجري له العملية، إنه ابني! كيف يُعقل هذا؟", hint:"من الممكن أن يكون الجراح شخصاً آخر غير الأب", options:["الجراح هو عمّ الطفل","الجراح هي والدة الطفل","كان الطفل يحلم","الجراح جده"], a:1},
+    {q:"ما الشيء الذي يمكن أن تمسكه بيدك اليسرى، لكن لا يمكنك أن تمسكه بيدك اليمنى؟", hint:"فكّر في وضعية اليد نفسها لا في شيء خارجي", options:["الهواء","المرفق الأيمن","الظل","الماء"], a:1},
+    {q:"لدى مزارع 17 خروفاً، ومات جميعهم إلا 9، كم خروفاً بقي له؟", hint:"اقرأ السؤال مرة أخرى بدقة", options:["8","9","17","0"], a:1},
+    {q:"كلما زاد منه أخذت أقل، وكلما نقص منه أخذت أكثر، ما هو؟", hint:"يتعلق بالطريق الذي تسلكه", options:["الطريق المختصر","السرعة","الوقت المستغرق بالسفر","المسافة"], a:2},
+    {q:"شخص يعيش في الطابق العاشر، كل يوم يأخذ المصعد للطابق الأرضي، لكنه يعود للطابق السابع فقط بالمصعد ويكمل الباقي سيراً، إلا في الأيام الممطرة. لماذا؟", hint:"فكّر بطول القامة وما يحمله بيده", options:["المصعد معطل جزئياً","لا يصل زره للطابق العاشر إلا بالمظلة","يحب الرياضة","يخاف من المصعد"], a:1},
+    {q:"إذا كان اليوم قبل أمس هو الجمعة، فما هو يوم بعد غد؟", hint:"حدد أولاً ما هو 'اليوم' الحالي", options:["الاثنين","الثلاثاء","الأحد","السبت"], a:1},
+    {q:"ثلاثة مصابيح في غرفة مغلقة، وخارجها ثلاثة مفاتيح، تدخل الغرفة مرة واحدة فقط. كيف تعرف أي مفتاح لأي مصباح؟", hint:"استخدم الحرارة لا الضوء فقط", options:["تخمّن عشوائياً","تشغّل مفتاحين وتلاحظ الفرق باللون","تشغّل مفتاحاً لفترة ثم تطفئه وتشغّل آخر، ثم تدخل وتلمس المصابيح","لا يمكن معرفة ذلك"], a:2},
+    {q:"ما العدد الذي إذا ضربته في أي رقم بقي كما هو؟", hint:"فكر بعملية الضرب الأساسية", options:["الصفر","الواحد","العشرة","لا يوجد"], a:1},
+    {q:"كم عدد الأشهر التي فيها 28 يوماً؟", hint:"فكّر في كل الأشهر وليس شهراً واحداً فقط", options:["شهر واحد فقط","شهرين","كل الأشهر الـ12","لا يوجد"], a:2},
+    {q:"امرأة أعطت متسولاً 10 ريالات، المتسول هو ابن أخيها، لكنه ليس ابن أخت المرأة، فكيف يكون قرابتهما؟", hint:"المرأة هي والدة المتسول نفسه", options:["المرأة هي أم المتسول","المرأة هي جدته","المرأة هي زوجة عمه","لا توجد قرابة"], a:0},
+    {q:"لديك كيسان من العملات، كل عملة تزن 10 غرامات إلا كيساً واحداً فيه عملات مزيفة تزن 9 غرامات فقط، ولديك ميزان رقمي دقيق تستخدمه مرة واحدة فقط. كيف تعرف أي كيس فيه العملات المزيفة من بين 10 أكياس؟", hint:"خذ عدداً مختلفاً من العملات من كل كيس (1 من الأول، 2 من الثاني...)", options:["تزن كل كيس على حدة","تخمّن عشوائياً","تأخذ عدد عملات مختلف من كل كيس (1،2،3...) وتزنها معاً دفعة واحدة، والنقص عن الوزن المتوقع يدلك على رقم الكيس","لا يمكن معرفة ذلك بوزنة واحدة"], a:2},
+    {q:"عامل بناء يقع من سلم ارتفاعه 10 أمتار ولا يصاب بأي جرح، كيف؟", hint:"لم يذكر السؤال في أي درجة كان واقفاً", options:["كان يرتدي خوذة واقية","كان على الدرجة الأولى من السلم","سقط على رمل ناعم","كان السلم مطاطياً"], a:1},
+    {q:"ما هو العدد الذي إذا طرحت منه 5 حصلت على نفس نتيجة إذا قسمته على 5؟", hint:"جرب أرقاماً صغيرة وتحقق بالتعويض", options:["5.25","6.25","7","10"], a:1},
+    {q:"صندوقان أحدهما فيه تفاحتان والآخر فيه تفاحة واحدة، نقلت تفاحة من الصندوق الأول للثاني، ماذا أصبح في كل صندوق؟", hint:"اتبع الحركة خطوة بخطوة بعناية", options:["الأول: صفر والثاني: 3","الأول: تفاحة والثاني: تفاحتان","الأول: تفاحتان والثاني: صفر","الأول: 3 والثاني: صفر"], a:1},
+    {q:"ما الكلمة التي إذا أضفت لها حرفاً واحداً أصبحت أقصر؟", hint:"فكّر في معنى الكلمة نفسها لا عدد حروفها", options:["كلمة 'طويلة'","كلمة 'قصيرة'","كلمة 'كبيرة'","كلمة 'قليلة'"], a:1},
+    {q:"في سباق تجاوزت الشخص الثاني، في أي مركز أصبحت الآن؟", hint:"لا تفكر أنك أصبحت أولاً", options:["الأول","الثاني","الثالث","لا يتغير مركزك"], a:1},
+    {q:"إذا كان اليوم الذي بعد غد هو الأربعاء، فما اليوم الذي كان قبل أمس؟", hint:"حدد اليوم الحالي أولاً بالحساب العكسي", options:["الجمعة","السبت","الأحد","الخميس"], a:0},
+  ],
+  hard: [
+    {q:"لديك إبريقان سعة أحدهما 5 لتر والآخر 3 لتر، وصنبور ماء مفتوح. كيف تقيس بالضبط 4 لترات؟", hint:"املأ الكبير، فرّغ منه بالصغير، ثم كرر العملية بذكاء", options:["تملأ الكبير وتفرغ منه الصغير مرتين","تملأ الصغير مرتين وتضيفهما للكبير","لا يمكن قياس 4 لترات بهذين الإبريقين","تملأ الكبير، تفرغ في الصغير، تفرغ الصغير، تكمل تفريغ الكبير بالصغير، تملأ الكبير وتكمل الصغير للحافة، يتبقى 4 في الكبير"], a:3},
+    {q:"في جزيرة، كل الأشخاص إما صادقون دائماً أو كاذبون دائماً. قابلت شخصاً قال: 'أنا كاذب'. ماذا يمكن أن نستنتج؟", hint:"لو قالها صادق يصبح كاذباً، ولو قالها كاذب يصبح صادقاً... تناقض", options:["هو صادق","هو كاذب","هذه العبارة متناقضة ولا يمكن أن تُقال فعلياً","هو نصف صادق"], a:2},
+    {q:"مائة سجين، كل واحد له رقم مختلف من 1 إلى 100 على قبعته يراه الآخرون لا هو، دون تواصل بينهم. يجب أن يخمن كل واحد مجموع كل الأرقام. كيف يضمنون نجاة واحد منهم على الأقل بحساب دقيق؟ (هذا سؤال منطقي مبسّط) - ما المبدأ الذي يُستخدم عادة لحل ألغاز كهذه؟", hint:"يتفقون مسبقاً على استراتيجية مشتركة قبل التجربة", options:["الحظ فقط","التواصل السري أثناء اللعبة","الاتفاق على استراتيجية رياضية مسبقة بينهم","كل واحد يخمن رقماً عشوائياً"], a:2},
+    {q:"عندك 8 كرات متماثلة الشكل، واحدة منها أثقل قليلاً من البقية، ولديك ميزان كفتين فقط. ما أقل عدد من مرات الوزن يضمن لك إيجاد الكرة الأثقل؟", hint:"قسّم الكرات إلى ثلاث مجموعات وليس مجموعتين", options:["مرة واحدة","مرتان","ثلاث مرات","أربع مرات"], a:1},
+    {q:"شخصان يلعبان لعبة: يقول أحدهما رقماً بين 1 و10، والثاني يزيد عليه رقماً بين 1 و10 أيضاً، ويستمران بالتناوب. من يصل بالمجموع إلى 100 أولاً يفوز. ما هو الرقم الذي يجب أن تصل إليه أولاً لضمان الفوز؟", hint:"فكّر بالعكس من 100 وانزل بفواصل ثابتة", options:["89","90","99","95"], a:1},
+    {q:"قطار يغادر مدينة أ الساعة 3 عصراً بسرعة 60 كم/س متجهاً لمدينة ب، وقطار آخر يغادر مدينة ب الساعة 3 عصراً أيضاً بسرعة 40 كم/س متجهاً لمدينة أ، والمسافة بينهما 300 كم. أي القطارين سيكون أقرب لمدينة أ عندما يتقابلان؟", hint:"عندما يتقابلان فهما بنفس النقطة بالضبط", options:["القطار الأول","القطار الثاني","كلاهما بنفس المسافة (يتقابلان بنفس النقطة)","لا يتقابلان أبداً"], a:2},
+    {q:"إذا كانت 5 آلات تصنع 5 قطع في 5 دقائق، كم دقيقة تحتاجها 100 آلة لتصنع 100 قطعة؟", hint:"لا تتسرع، فكّر بمعدل إنتاج الآلة الواحدة", options:["100 دقيقة","20 دقيقة","5 دقائق","500 دقيقة"], a:2},
+    {q:"بستان فيه زهور تتضاعف كل يوم، واستغرقت 30 يوماً لتغطية البستان بالكامل. في أي يوم كانت تغطي نصف البستان فقط؟", hint:"فكّر بالمضاعفة بشكل عكسي من اليوم الأخير", options:["اليوم 15","اليوم 29","اليوم 28","اليوم 20"], a:1},
+    {q:"ثلاثة أشخاص يدفعون 30 ريالاً مقابل غرفة فندق (10 لكل واحد). اكتشف المدير أن السعر الحقيقي 25 فقط، فأرسل 5 ريالات مع موظف ليعيدها. الموظف احتفظ بـ2 وأعطى كل شخص 1 ريال. الآن كل شخص دفع 9 ريالات (27 بالمجموع) + 2 مع الموظف = 29. أين ذهب الريال الناقص؟", hint:"العملية الحسابية نفسها خاطئة من الأساس، لا يوجد ريال مفقود فعلياً", options:["أخذه المدير","الطريقة بجمع 27+2 خاطئة أصلاً، لا يوجد ريال ضائع","احتفظ به الموظف زيادة","ذهب مع الضرائب"], a:1},
+    {q:"لديك ساعتا رمل، إحداهما تقيس 7 دقائق والأخرى تقيس 4 دقائق. كيف تقيس بالضبط 9 دقائق باستخدامهما معاً؟", hint:"ابدأ الاثنتين معاً، وعند انتهاء ساعة الـ4 دقائق اقلبها فوراً", options:["تشغل ساعة السبع فقط وتنتظر مرتين","تبدأ الاثنتين معاً، عند انتهاء الـ4 دقائق تقلبها، وعند انتهاء الـ7 دقائق (يبقى دقيقة بساعة الـ4) تقلب ساعة السبع فتُكمل دقيقة ثم تعكسها ليكتمل 9","لا يمكن قياس 9 دقائق بهاتين الساعتين","تشغل الساعتين معاً وتجمع وقتيهما"], a:1},
+    {q:"في غرفة 4 مصابيح متصلة بـ4 مفاتيح خارج الغرفة، لكن أحد المصابيح معطل تماماً ولا يعمل مهما فعلت. تدخل الغرفة مرة واحدة فقط لتحدد أي مفتاح لأي مصباح مع معرفة أيها المعطل. ما الاستراتيجية الأذكى؟", hint:"استخدم توقيت التشغيل والحرارة معاً وليس الإضاءة فقط", options:["تجرب المفاتيح عشوائياً","تشغّل 3 مفاتيح لفترات مختلفة قبل الدخول وتراقب الإضاءة والحرارة معاً لتحديد الرابع بالاستبعاد","تفتح كل المفاتيح معاً فقط","لا يمكن تحديد ذلك بزيارة واحدة"], a:1},
+    {q:"عمر الأب اليوم يساوي 3 أضعاف عمر ابنه، وبعد 12 سنة سيصبح عمره ضعف عمر ابنه فقط. ما عمر الابن الآن؟", hint:"اكتب معادلة: عمر الأب = 3س، وبعد 12 سنة: 3س+12 = 2×(س+12)", options:["10 سنوات","12 سنة","14 سنة","16 سنة"], a:1},
+    {q:"لديك متتالية أرقام: 1، 1، 2، 3، 5، 8، 13... ما الرقم التالي؟", hint:"كل رقم هو ناتج جمع الرقمين السابقين له", options:["18","20","21","24"], a:2},
+    {q:"شركة توظف حارساً يعمل يوماً ويرتاح يوماً، وحارساً آخر يعمل كل 3 أيام مرة. إذا عملا معاً يوم السبت، بعد كم يوماً سيعملان معاً مرة أخرى؟", hint:"أوجد المضاعف المشترك الأصغر بين فترتي عملهما", options:["3 أيام","4 أيام","6 أيام","9 أيام"], a:2},
+  ],
+};
+
+const DIFFICULTIES = [
+  {key:"easy", name:"سهل", meta:"ألغاز خفيفة ومسلية", cls:"easy", icon:"🧩"},
+  {key:"medium", name:"متوسط", meta:"يحتاج تفكير منطقي", cls:"medium", icon:"🧠"},
+  {key:"hard", name:"صعب", meta:"تحدٍ حقيقي للعقل", cls:"hard", icon:"🔥"},
+];
+
+/* ---------------- Sound engine (Web Audio API, no external files) ---------------- */
+const SoundFX = (function(){
+  let ctx = null;
+  let muted = false;
+
+  function ensureCtx(){
+    if(!ctx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(AC) ctx = new AC();
+    }
+    if(ctx && ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  function tone(freq, duration, type, startTime, gainPeak){
+    const c = ensureCtx();
+    if(!c || muted) return;
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, c.currentTime + startTime);
+    gain.gain.setValueAtTime(0, c.currentTime + startTime);
+    gain.gain.linearRampToValueAtTime(gainPeak, c.currentTime + startTime + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + startTime + duration);
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.start(c.currentTime + startTime);
+    osc.stop(c.currentTime + startTime + duration + 0.02);
+  }
+
+  return {
+    click(){ tone(520, 0.08, "sine", 0, 0.12); },
+    correct(){
+      tone(523.25, 0.14, "sine", 0, 0.18);
+      tone(659.25, 0.14, "sine", 0.10, 0.18);
+      tone(783.99, 0.22, "sine", 0.20, 0.20);
+    },
+    wrong(){
+      tone(220, 0.18, "sawtooth", 0, 0.12);
+      tone(174.61, 0.28, "sawtooth", 0.12, 0.12);
+    },
+    hint(){
+      tone(880, 0.10, "triangle", 0, 0.10);
+      tone(1046.5, 0.12, "triangle", 0.08, 0.10);
+    },
+    win(){
+      [523.25,659.25,783.99,1046.5].forEach((f,i)=> tone(f, 0.22, "sine", i*0.12, 0.18));
+    },
+    isMuted(){ return muted; },
+    setMuted(v){ muted = v; },
+    toggle(){ muted = !muted; return muted; }
+  };
+})();
+
+async function loadMutePref(){
+  try{
+    const res = await window.storage.get("riddle-muted", false);
+    if(res && res.value === "1") SoundFX.setMuted(true);
+  }catch(e){}
+}
+async function saveMutePref(v){
+  try{ await window.storage.set("riddle-muted", v ? "1" : "0", false); }catch(e){}
+}
+loadMutePref();
+
+/* ---------------- State ---------------- */
+let state = {
+  screen: "home",
+  difficulty: null,
+  qIndex: 0,
+  score: 0,
+  questions: [],
+  answered: false,
+  hintUsed: false,
+};
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+async function getBest(diffKey){
+  try{
+    const res = await window.storage.get(`riddle-best:${diffKey}`, false);
+    return res ? parseInt(res.value) : 0;
+  }catch(e){ return 0; }
+}
+async function setBest(diffKey, score){
+  try{ await window.storage.set(`riddle-best:${diffKey}`, String(score), false); }catch(e){}
+}
+
+/* Track which riddles (by question text) were already served per difficulty,
+   so repeats only happen after the whole pool has been seen. */
+async function getSeen(diffKey){
+  try{
+    const res = await window.storage.get(`riddle-seen:${diffKey}`, false);
+    return res ? JSON.parse(res.value) : [];
+  }catch(e){ return []; }
+}
+async function setSeen(diffKey, seenArr){
+  try{ await window.storage.set(`riddle-seen:${diffKey}`, JSON.stringify(seenArr), false); }catch(e){}
+}
+
+async function pickQuestionSet(diffKey, count){
+  const bank = RIDDLES[diffKey];
+  let seen = await getSeen(diffKey);
+  let unseen = bank.filter(q => !seen.includes(q.q));
+
+  if(unseen.length < count){
+    // pool exhausted (or nearly) — reset rotation, keep any leftover unseen first
+    const chosen = shuffle(unseen);
+    seen = [];
+    const need = count - chosen.length;
+    const rest = shuffle(bank.filter(q => !chosen.includes(q))).slice(0, need);
+    const finalSet = shuffle([...chosen, ...rest]);
+    await setSeen(diffKey, finalSet.map(q => q.q));
+    return finalSet;
+  } else {
+    const chosen = shuffle(unseen).slice(0, count);
+    await setSeen(diffKey, [...seen, ...chosen.map(q => q.q)]);
+    return chosen;
+  }
+}
+
+/* ---------------- Procedural riddle generators ----------------
+   Instead of storing thousands of static lines, these build fresh
+   logic/math riddles with randomized numbers every time, so the
+   pool is effectively endless and never truly repeats the same
+   numbers twice in a row. */
+
+function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function buildOptions(correct, distractors){
+  const set = new Set([correct, ...distractors]);
+  while(set.size < 4){ set.add(correct + randInt(-9,9) || correct+1); }
+  const opts = shuffle([...set].slice(0,4));
+  return { options: opts.map(String), a: opts.indexOf(correct) };
+}
+
+const GENERATORS = {
+  easy: [
+    // simple subtraction word riddle
+    () => {
+      const total = randInt(10, 30);
+      const taken = randInt(2, total-2);
+      const left = total - taken;
+      const {options, a} = buildOptions(left, [left+1, left-1, taken]);
+      return {
+        q: `عند أحمد ${total} حبة حلوى، أعطى صديقه ${taken} منها، كم حبة بقيت معه؟`,
+        hint: "اطرح عدد الحلوى الموزّعة من العدد الكلي",
+        options, a
+      };
+    },
+    // next number in arithmetic sequence
+    () => {
+      const start = randInt(1, 10);
+      const step = randInt(2, 6);
+      const seq = [start, start+step, start+2*step, start+3*step];
+      const next = start + 4*step;
+      const {options, a} = buildOptions(next, [next+step, next-1, next+1]);
+      return {
+        q: `ما هو الرقم التالي في هذا التسلسل: ${seq.join('، ')}؟`,
+        hint: `الفرق ثابت بين كل رقم والذي يليه (${step})`,
+        options, a
+      };
+    },
+    // simple multiplication riddle
+    () => {
+      const a1 = randInt(2, 9);
+      const b1 = randInt(2, 9);
+      const product = a1*b1;
+      const {options, a} = buildOptions(product, [product+a1, product-b1, a1+b1]);
+      return {
+        q: `في كل صندوق ${a1} تفاحات، وعندك ${b1} صناديق، كم عدد التفاحات كلها؟`,
+        hint: "اضرب عدد الصناديق في عدد التفاحات بكل صندوق",
+        options, a
+      };
+    },
+    // day of week riddle
+    () => {
+      const days = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+      const startIdx = randInt(0, 6);
+      const add = randInt(2, 6);
+      const targetIdx = (startIdx + add) % 7;
+      const wrong1 = days[(targetIdx+1)%7];
+      const wrong2 = days[(targetIdx+6)%7];
+      const {options, a} = buildOptionsStr(days[targetIdx], [wrong1, wrong2, days[startIdx]], days);
+      return {
+        q: `إذا كان اليوم هو يوم ${days[startIdx]}، فما هو اليوم بعد ${add} أيام؟`,
+        hint: "عُدّ الأيام بالترتيب بدءاً من اليوم التالي",
+        options, a
+      };
+    },
+  ],
+  medium: [
+    // age riddle
+    () => {
+      const sonAge = randInt(6, 15);
+      const mult = randInt(2, 4);
+      const fatherAge = sonAge*mult;
+      const years = randInt(5, 15);
+      const {options, a} = buildOptions(sonAge, [sonAge+2, sonAge-2, Math.round(sonAge*1.5)]);
+      return {
+        q: `عمر الأب اليوم يساوي ${mult} أضعاف عمر ابنه، وعمر الأب الآن ${fatherAge} سنة. كم عمر الابن؟`,
+        hint: `اقسم عمر الأب على ${mult}`,
+        options, a
+      };
+    },
+    // work rate riddle
+    () => {
+      const workers = randInt(2, 6);
+      const days = randInt(2, 8);
+      const totalWorkerDays = workers*days;
+      const newWorkers = randInt(2, 8);
+      let newDays = totalWorkerDays / newWorkers;
+      while(!Number.isInteger(newDays)){
+        newDays = totalWorkerDays / newWorkers;
+        if(!Number.isInteger(newDays)){ newDays = Math.round(newDays); break; }
+      }
+      const {options, a} = buildOptions(Math.round(newDays), [Math.round(newDays)+1, Math.round(newDays)-1, days]);
+      return {
+        q: `إذا كان ${workers} عمال ينهون بناء جدار في ${days} أيام، كم يوماً يحتاجه ${newWorkers} عمال بنفس الوتيرة؟`,
+        hint: "احسب إجمالي 'عامل × يوم' ثم اقسمه على عدد العمال الجدد",
+        options, a
+      };
+    },
+    // distance-speed-time riddle
+    () => {
+      const speed = randInt(40, 100);
+      const time = randInt(2, 6);
+      const distance = speed*time;
+      const {options, a} = buildOptions(distance, [distance+speed, distance-speed, distance+time]);
+      return {
+        q: `سيارة تسير بسرعة ${speed} كم/س لمدة ${time} ساعات، كم كيلومتراً تقطع؟`,
+        hint: "المسافة = السرعة × الزمن",
+        options, a
+      };
+    },
+    // percentage riddle
+    () => {
+      const base = randInt(2, 20)*10;
+      const pct = [10,20,25,50][randInt(0,3)];
+      const result = base*pct/100;
+      const {options, a} = buildOptions(result, [result+5, result-5, base-result]);
+      return {
+        q: `ما هو ${pct}% من العدد ${base}؟`,
+        hint: "حوّل النسبة إلى كسر واضربه بالعدد",
+        options, a
+      };
+    },
+  ],
+  hard: [
+    // two trains meeting time
+    () => {
+      const s1 = randInt(30, 80);
+      const s2 = randInt(30, 80);
+      const dist = (s1+s2)*randInt(2,5);
+      const time = dist/(s1+s2);
+      const {options, a} = buildOptions(Math.round(time), [Math.round(time)+1, Math.round(time)-1, Math.round(dist/s1)]);
+      return {
+        q: `قطاران يتحركان نحو بعضهما بسرعة ${s1} و${s2} كم/س، والمسافة بينهما ${dist} كم. بعد كم ساعة يتقابلان؟`,
+        hint: "اجمع السرعتين ثم اقسم المسافة على المجموع",
+        options, a
+      };
+    },
+    // pipe filling riddle
+    () => {
+      const h1 = randInt(2, 6);
+      const h2 = randInt(2, 6);
+      // combined rate = 1/h1 + 1/h2, time = 1/(rate)
+      const timeExact = (h1*h2)/(h1+h2);
+      const timeRounded = Math.round(timeExact*10)/10;
+      const {options, a} = buildOptionsFloat(timeRounded, [Math.round((timeExact+0.5)*10)/10, Math.round((timeExact-0.5)*10)/10, h1+h2]);
+      return {
+        q: `صنبور يملأ خزاناً في ${h1} ساعات، وصنبور آخر يملؤه في ${h2} ساعات. إذا فتحا معاً، كم ساعة يحتاجان لملء الخزان؟ (قرّب للأقرب عُشر)`,
+        hint: "اجمع معدلي الملء (1/الأول + 1/الثاني) ثم اقلب الناتج",
+        options, a
+      };
+    },
+    // age riddle with future twist
+    () => {
+      const sonAge = randInt(5, 12);
+      const mult = randInt(3, 5);
+      const fatherAge = sonAge*mult;
+      const years = randInt(5, 15);
+      // check future ratio
+      const futureRatio = (fatherAge+years)/(sonAge+years);
+      const {options, a} = buildOptions(sonAge, [sonAge+1, sonAge-1, sonAge+2]);
+      return {
+        q: `عمر الأب اليوم ${mult} أضعاف عمر ابنه (عمر الأب ${fatherAge} سنة). كم عمر الابن الآن؟`,
+        hint: `عمر الابن = عمر الأب ÷ ${mult}`,
+        options, a
+      };
+    },
+    // sequence with ratio (geometric)
+    () => {
+      const start = randInt(1, 4);
+      const ratio = randInt(2, 3);
+      const seq = [start, start*ratio, start*ratio*ratio, start*ratio*ratio*ratio];
+      const next = start*Math.pow(ratio,4);
+      const {options, a} = buildOptions(next, [next+start, Math.round(next/ratio), next-ratio]);
+      return {
+        q: `ما هو الرقم التالي في هذا التسلسل: ${seq.join('، ')}؟`,
+        hint: `كل رقم يُضرب في ${ratio} للحصول على التالي`,
+        options, a
+      };
+    },
+  ],
+};
+
+function buildOptionsStr(correct, distractors, pool){
+  const set = new Set([correct]);
+  distractors.forEach(d => { if(set.size < 4) set.add(d); });
+  if(pool){
+    let i = 0;
+    while(set.size < 4 && i < pool.length){
+      set.add(pool[i]);
+      i++;
+    }
+  }
+  const opts = shuffle([...set].slice(0,4));
+  return { options: opts, a: opts.indexOf(correct) };
+}
+function buildOptionsFloat(correct, distractors){
+  const set = new Set([correct, ...distractors]);
+  const opts = shuffle([...set].slice(0,4));
+  return { options: opts.map(String), a: opts.indexOf(correct) };
+}
+
+function generateRiddle(diffKey){
+  const gens = GENERATORS[diffKey];
+  const gen = gens[randInt(0, gens.length-1)];
+  return gen();
+}
+
+/* ---------------- Rendering ---------------- */
+const app = document.getElementById("app");
+
+function render(){
+  if(state.screen === "home") renderHome();
+  else if(state.screen === "quiz") renderQuiz();
+  else if(state.screen === "result") renderResult();
+}
+
+function renderHome(){
+  app.innerHTML = `
+    <div class="screen card">
+      <div class="motif tl"></div><div class="motif br"></div>
+      <button class="sound-toggle" id="soundToggle" aria-label="تشغيل/كتم الصوت">${SoundFX.isMuted() ? "🔇" : "🔊"}</button>
+      <h1 class="title">🔮 حزازير وألغاز</h1>
+      <p class="subtitle">اختبر ذكاءك وقدرتك على التفكير المنطقي</p>
+      <div class="diff-list" id="diffList"></div>
+    </div>
+  `;
+  document.getElementById("soundToggle").onclick = ()=>{
+    const nowMuted = SoundFX.toggle();
+    saveMutePref(nowMuted);
+    document.getElementById("soundToggle").textContent = nowMuted ? "🔇" : "🔊";
+    if(!nowMuted) SoundFX.click();
+  };
+  const list = document.getElementById("diffList");
+  DIFFICULTIES.forEach(d=>{
+    const btn = document.createElement("button");
+    btn.className = `diff-btn ${d.cls}`;
+    btn.innerHTML = `<span style="display:flex;align-items:center;gap:10px;"><span class="dot"></span>${d.icon} ${d.name}</span><span class="meta">${d.meta}</span>`;
+    btn.onclick = ()=> { SoundFX.click(); startQuiz(d.key); };
+    list.appendChild(btn);
+  });
+}
+
+const ROUND_SIZE = 8;
+const CURATED_PER_ROUND = 3; // rest of the round is procedurally generated (always fresh)
+
+async function startQuiz(diffKey){
+  state.difficulty = diffKey;
+  const curatedCount = Math.min(CURATED_PER_ROUND, RIDDLES[diffKey].length);
+  const curated = await pickQuestionSet(diffKey, curatedCount);
+  const generatedCount = ROUND_SIZE - curated.length;
+  const generated = Array.from({length: generatedCount}, () => generateRiddle(diffKey));
+  state.questions = shuffle([...curated, ...generated]);
+  state.qIndex = 0;
+  state.score = 0;
+  state.answered = false;
+  state.hintUsed = false;
+  state.screen = "quiz";
+  render();
+}
+
+function renderQuiz(){
+  const diffInfo = DIFFICULTIES.find(d=>d.key===state.difficulty);
+  const total = state.questions.length;
+  const q = state.questions[state.qIndex];
+  const progressPct = Math.round((state.qIndex/total)*100);
+  state.hintUsed = false;
+
+  app.innerHTML = `
+    <div class="screen card">
+      <div class="motif tl"></div><div class="motif br"></div>
+      <div class="quiz-top">
+        <span>${diffInfo.icon} ${diffInfo.name}</span>
+        <span style="display:flex; align-items:center; gap:8px;">
+          <button id="soundToggleQuiz" style="background:none;border:none;font-size:1.05rem;cursor:pointer;color:var(--text-dim);">${SoundFX.isMuted() ? "🔇" : "🔊"}</button>
+          <span class="score-pill">النقاط: ${state.score}</span>
+        </span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${progressPct}%"></div></div>
+      <div class="riddle-box">
+        <span class="riddle-icon">🧩</span>
+        <div class="q-text">${state.qIndex+1}. ${q.q}</div>
+      </div>
+      <div class="hint-text" id="hintText">💡 ${q.hint}</div>
+      <div class="hint-row">
+        <button class="hint-btn" id="hintBtn">إظهار تلميح (-1 نقطة)</button>
+      </div>
+      <div class="options" id="options"></div>
+      <div class="next-hint" id="nextHint"></div>
+    </div>
+  `;
+
+  document.getElementById("soundToggleQuiz").onclick = ()=>{
+    const nowMuted = SoundFX.toggle();
+    saveMutePref(nowMuted);
+    document.getElementById("soundToggleQuiz").textContent = nowMuted ? "🔇" : "🔊";
+  };
+
+  document.getElementById("hintBtn").onclick = ()=>{
+    SoundFX.hint();
+    state.hintUsed = true;
+    document.getElementById("hintText").classList.add("show");
+    document.getElementById("hintBtn").disabled = true;
+  };
+
+  const optsEl = document.getElementById("options");
+  const shuffledOrder = q.options.map((text,i)=>({text,i}));
+  q._display = shuffledOrder;
+
+  shuffledOrder.forEach(opt=>{
+    const btn = document.createElement("button");
+    btn.className = "opt-btn";
+    btn.textContent = opt.text;
+    btn.onclick = ()=> handleAnswer(opt.i, btn);
+    optsEl.appendChild(btn);
+  });
+
+  state.answered = false;
+}
+
+function handleAnswer(chosenIndex, btnEl){
+  if(state.answered) return;
+  state.answered = true;
+  const q = state.questions[state.qIndex];
+  const buttons = document.querySelectorAll(".opt-btn");
+  buttons.forEach(b=> b.disabled = true);
+  document.getElementById("hintBtn").disabled = true;
+
+  const displayOrder = q._display;
+  displayOrder.forEach((opt, idx)=>{
+    const btn = buttons[idx];
+    if(opt.i === q.a) btn.classList.add("correct");
+    else if(opt.i === chosenIndex) btn.classList.add("wrong");
+  });
+
+  const correct = chosenIndex === q.a;
+  if(correct) state.score += state.hintUsed ? 0 : 1;
+  if(correct) SoundFX.correct(); else SoundFX.wrong();
+
+  const hint = document.getElementById("nextHint");
+  hint.textContent = correct
+    ? (state.hintUsed ? "إجابة صحيحة (بدون نقاط بسبب التلميح) ✅" : "إجابة صحيحة! 🎉")
+    : "إجابة خاطئة";
+
+  setTimeout(()=>{
+    if(state.qIndex < state.questions.length - 1){
+      state.qIndex += 1;
+      render();
+    } else {
+      finishQuiz();
+    }
+  }, 1300);
+}
+
+async function finishQuiz(){
+  const best = await getBest(state.difficulty);
+  if(state.score > best) await setBest(state.difficulty, state.score);
+  state.screen = "result";
+  render();
+}
+
+async function renderResult(){
+  const total = state.questions.length;
+  const pct = Math.round((state.score/total)*100);
+  const diffInfo = DIFFICULTIES.find(d=>d.key===state.difficulty);
+  const best = await getBest(state.difficulty);
+
+  let emoji = "🙂";
+  let label = "محاولة جيدة";
+  if(pct === 100){ emoji="🏆"; label="عبقري! حللت كل الألغاز"; SoundFX.win(); }
+  else if(pct >= 70){ emoji="🌟"; label="ذكاء رائع"; }
+  else if(pct >= 40){ emoji="👍"; label="لا بأس، حاول مجدداً"; }
+  else { emoji="💪"; label="حاول مرة أخرى، عقلك أقوى من كذا"; }
+
+  app.innerHTML = `
+    <div class="screen card">
+      <div class="motif tl"></div><div class="motif br"></div>
+      <div class="result-emoji">${emoji}</div>
+      <div class="result-score">${state.score} / ${total}</div>
+      <div class="result-label">${label} — ${diffInfo.icon} ${diffInfo.name}</div>
+      <div class="result-best">أفضل نتيجة لهذا المستوى: ${best} / ${total}</div>
+      <div class="rule"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="retryBtn">إعادة المحاولة</button>
+        <button class="btn btn-secondary" id="homeBtn">المستويات</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("retryBtn").onclick = ()=> { SoundFX.click(); startQuiz(state.difficulty); };
+  document.getElementById("homeBtn").onclick = ()=>{ SoundFX.click(); state.screen="home"; render(); };
+}
+
+render();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
